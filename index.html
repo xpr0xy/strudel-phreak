@@ -151,24 +151,65 @@
       min-height: 0;
     }
 
-    textarea#editor {
+    /* Style the strudel-editor to fill space and match theme */
+    strudel-editor {
       flex: 1;
-      width: 100%;
-      background: var(--bg);
-      color: var(--text);
-      border: none;
-      padding: 16px;
-      font-family: inherit;
-      font-size: 14px;
-      line-height: 1.6;
-      resize: none;
-      outline: none;
-      tab-size: 2;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --line-bg: #0a0a0f;
+      --line-highlight: rgba(203, 166, 247, 0.05);
+      --selection: rgba(203, 166, 247, 0.3);
+      --cursor: #cba6f7;
+      --foreground: #cdd6f4;
+      --keyword: #cba6f7;
+      --string: #a6e3a1;
+      --number: #fab387;
+      --comment: #6c7086;
+    }
+
+    strudel-editor .cm-editor {
+      flex: 1;
       min-height: 0;
     }
 
-    textarea#editor::selection {
-      background: rgba(203, 166, 247, 0.3);
+    strudel-editor .cm-scroller {
+      font-family: 'JetBrains Mono', 'Courier New', monospace !important;
+      font-size: 14px !important;
+      line-height: 1.6 !important;
+    }
+
+    strudel-editor .cm-gutters {
+      background: var(--surface) !important;
+      border-right: 1px solid var(--border) !important;
+      color: var(--muted) !important;
+    }
+
+    strudel-editor .cm-activeLineGutter {
+      background: rgba(203, 166, 247, 0.1) !important;
+      color: var(--accent) !important;
+    }
+
+    strudel-editor .cm-activeLine {
+      background: rgba(203, 166, 247, 0.05) !important;
+    }
+
+    strudel-editor .cm-cursor {
+      border-left-color: var(--accent) !important;
+    }
+
+    strudel-editor .cm-selectionBackground {
+      background: rgba(203, 166, 247, 0.2) !important;
+    }
+
+    /* Hide strudel's built-in buttons if any */
+    strudel-editor button {
+      background: transparent !important;
+      border: 1px solid var(--muted) !important;
+      color: var(--text) !important;
+      font-family: 'JetBrains Mono', monospace !important;
     }
 
     .visualizer {
@@ -231,7 +272,7 @@
       .presets { order: 2; width: 100%; justify-content: stretch; }
       .presets button { flex: 1; padding: 8px 4px; font-size: 10px; }
       .control-group { order: 1; }
-      textarea#editor { font-size: 13px; padding: 12px; }
+      strudel-editor .cm-scroller { font-size: 13px !important; }
       .status-right { display: none; }
       .visualizer { height: 40px; }
     }
@@ -312,7 +353,9 @@
   </header>
 
   <div class="main">
-    <textarea id="editor" spellcheck="false" placeholder="loading strudel..."></textarea>
+    <strudel-editor>
+      <!-- deep house groove loaded by default -->
+    </strudel-editor>
     <div class="visualizer">
       <canvas id="scope"></canvas>
     </div>
@@ -366,12 +409,10 @@
     </div>
   </div>
 
-  <!-- Use strudel/repl web component - handles all deps internally -->
   <script src="https://unpkg.com/@strudel/repl@1.0.2"></script>
   <script>
     let isPlaying = false;
 
-    // Presets
     const presets = {
       deephouse: `// deep house groove
 stack(
@@ -410,52 +451,42 @@ stack(
 )`
     };
 
-    // Wait for strudel-editor component to register
-    customElements.whenDefined('strudel-editor').then(() => {
-      document.getElementById('status-text').textContent = 'ready';
-      loadPreset('deephouse');
-    });
-
     function getEditor() {
       return document.querySelector('strudel-editor');
     }
 
     function loadPreset(name) {
       const editor = getEditor();
-      if (editor) {
+      if (editor && editor.setCode) {
         editor.setCode(presets[name]);
-      } else {
-        document.getElementById('editor').value = presets[name];
       }
     }
 
     function doEval() {
       const editor = getEditor();
       if (editor) {
-        editor.evaluate();
-      } else {
-        // fallback: use textarea
-        const code = document.getElementById('editor').value;
-        if (code.trim()) {
-          try {
-            evaluate(code);
-            isPlaying = true;
-            document.getElementById('status-dot').classList.add('running');
-            document.getElementById('status-text').textContent = 'playing';
-          } catch(e) {
-            document.getElementById('status-text').textContent = 'error';
-            console.error(e);
-          }
+        if (editor.evaluate) {
+          editor.evaluate();
+        } else {
+          // fallback: try dispatching ctrl+enter
+          editor.dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'Enter', ctrlKey: true, bubbles: true
+          }));
         }
+        isPlaying = true;
+        document.getElementById('status-dot').classList.add('running');
+        document.getElementById('status-text').textContent = 'playing';
       }
     }
 
     function doStop() {
       const editor = getEditor();
       if (editor) {
-        editor.stop();
-      } else {
-        hush();
+        if (editor.stop) {
+          editor.stop();
+        } else if (editor.hush) {
+          editor.hush();
+        }
       }
       isPlaying = false;
       document.getElementById('status-dot').classList.remove('running');
@@ -464,11 +495,7 @@ stack(
 
     function setBPM(val) {
       document.getElementById('bpm-val').textContent = val;
-      const editor = getEditor();
-      if (editor) {
-        // The editor should pick up setcps changes
-        try { setcps(val / 60 / 4); } catch(e) {}
-      }
+      // strudel-editor should handle setcps internally
     }
 
     function toggleHelp() {
@@ -527,11 +554,17 @@ stack(
     }
     drawScope();
 
+    // Initialize
+    customElements.whenDefined('strudel-editor').then(() => {
+      document.getElementById('status-text').textContent = 'ready';
+      // Load default preset
+      setTimeout(() => loadPreset('deephouse'), 500);
+    });
+
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); doEval(); }
       if (e.ctrlKey && e.key === '/') { e.preventDefault(); toggleHelp(); }
-      if (e.ctrlKey && e.key === '.') { e.preventDefault(); doStop(); }
+      // ctrl+enter is handled by strudel-editor internally
     });
   </script>
 </body>
