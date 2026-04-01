@@ -65,19 +65,12 @@
       border-radius: 3px;
     }
 
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
     .presets {
       display: flex;
       gap: 4px;
     }
 
-    .presets button, button {
+    .presets button {
       background: transparent;
       color: var(--text);
       border: 1px solid var(--muted);
@@ -91,138 +84,24 @@
       letter-spacing: 0.5px;
     }
 
-    .presets button:hover, button:hover {
+    .presets button:hover, .presets button.active {
       border-color: var(--accent);
       background: var(--accent);
       color: var(--bg);
     }
 
-    button.stop {
-      border-color: var(--red);
-    }
-
-    button.stop:hover {
-      background: var(--red);
-    }
-
-    .control-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .control-group label {
-      font-size: 9px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    input[type="range"] {
-      -webkit-appearance: none;
-      width: 70px;
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      outline: none;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 14px;
-      height: 14px;
-      background: var(--accent);
-      border-radius: 50%;
-      cursor: pointer;
-    }
-
-    .val {
-      font-size: 11px;
-      color: var(--accent2);
-      min-width: 28px;
-      text-align: right;
-    }
-
     .main {
       flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      min-height: 0;
     }
 
-    /* Style the strudel-editor to fill space and match theme */
-    strudel-editor {
+    iframe#repl {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      --bg: #0a0a0f;
-      --surface: #12121a;
-      --line-bg: #0a0a0f;
-      --line-highlight: rgba(203, 166, 247, 0.05);
-      --selection: rgba(203, 166, 247, 0.3);
-      --cursor: #cba6f7;
-      --foreground: #cdd6f4;
-      --keyword: #cba6f7;
-      --string: #a6e3a1;
-      --number: #fab387;
-      --comment: #6c7086;
-    }
-
-    strudel-editor .cm-editor {
-      flex: 1;
-      min-height: 0;
-    }
-
-    strudel-editor .cm-scroller {
-      font-family: 'JetBrains Mono', 'Courier New', monospace !important;
-      font-size: 14px !important;
-      line-height: 1.6 !important;
-    }
-
-    strudel-editor .cm-gutters {
-      background: var(--surface) !important;
-      border-right: 1px solid var(--border) !important;
-      color: var(--muted) !important;
-    }
-
-    strudel-editor .cm-activeLineGutter {
-      background: rgba(203, 166, 247, 0.1) !important;
-      color: var(--accent) !important;
-    }
-
-    strudel-editor .cm-activeLine {
-      background: rgba(203, 166, 247, 0.05) !important;
-    }
-
-    strudel-editor .cm-cursor {
-      border-left-color: var(--accent) !important;
-    }
-
-    strudel-editor .cm-selectionBackground {
-      background: rgba(203, 166, 247, 0.2) !important;
-    }
-
-    /* Hide strudel's built-in buttons if any */
-    strudel-editor button {
-      background: transparent !important;
-      border: 1px solid var(--muted) !important;
-      color: var(--text) !important;
-      font-family: 'JetBrains Mono', monospace !important;
-    }
-
-    .visualizer {
-      height: 50px;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-
-    canvas#scope {
+      border: none;
       width: 100%;
-      height: 100%;
-      display: block;
+      min-height: 0;
     }
 
     .status-bar {
@@ -236,7 +115,7 @@
       flex-shrink: 0;
     }
 
-    .status-left, .status-right {
+    .status-left {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -252,10 +131,6 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: var(--muted);
-    }
-
-    .dot.running {
       background: var(--green);
       animation: pulse 1.5s infinite;
     }
@@ -268,151 +143,41 @@
     @media (max-width: 640px) {
       header { padding: 8px 12px; }
       .logo h1 { font-size: 12px; }
-      .controls { width: 100%; justify-content: space-between; }
-      .presets { order: 2; width: 100%; justify-content: stretch; }
+      .presets { width: 100%; justify-content: stretch; }
       .presets button { flex: 1; padding: 8px 4px; font-size: 10px; }
-      .control-group { order: 1; }
-      strudel-editor .cm-scroller { font-size: 13px !important; }
       .status-right { display: none; }
-      .visualizer { height: 40px; }
     }
-
-    .help-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(10, 10, 15, 0.92);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .help-overlay.visible { display: flex; }
-
-    .help-content {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 20px 24px;
-      max-width: 480px;
-      width: 100%;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-
-    .help-content h2 {
-      color: var(--accent);
-      font-size: 13px;
-      margin-bottom: 14px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    .help-content kbd {
-      background: var(--border);
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-size: 10px;
-      color: var(--accent2);
-    }
-
-    .help-content p { font-size: 11px; line-height: 1.9; }
-    .help-content a { color: var(--accent); }
-
-    .help-section {
-      margin-top: 12px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-    }
-
-    .close { margin-top: 14px; }
   </style>
 </head>
 <body>
   <header>
     <div class="logo">
       <h1>strudel phreak</h1>
-      <span class="tag">v0.2</span>
-    </div>
-    <div class="controls">
-      <div class="control-group">
-        <label>bpm</label>
-        <input type="range" id="bpm" min="60" max="200" value="128" oninput="setBPM(this.value)">
-        <span class="val" id="bpm-val">128</span>
-      </div>
-      <button class="eval-btn" onclick="doEval()">eval</button>
-      <button class="stop" onclick="doStop()">stop</button>
+      <span class="tag">v0.3</span>
     </div>
     <div class="presets">
-      <button onclick="loadPreset('deephouse')">deep house</button>
-      <button onclick="loadPreset('breakcore')">breakcore</button>
-      <button onclick="loadPreset('acid')">acid</button>
-      <button onclick="loadPreset('ambient')">ambient</button>
+      <button onclick="loadPreset('deephouse')" id="btn-deephouse" class="active">deep house</button>
+      <button onclick="loadPreset('breakcore')" id="btn-breakcore">breakcore</button>
+      <button onclick="loadPreset('acid')" id="btn-acid">acid</button>
+      <button onclick="loadPreset('ambient')" id="btn-ambient">ambient</button>
     </div>
   </header>
 
   <div class="main">
-    <strudel-editor>
-      <!-- deep house groove loaded by default -->
-    </strudel-editor>
-    <div class="visualizer">
-      <canvas id="scope"></canvas>
-    </div>
+    <iframe id="repl" allow="autoplay" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
   </div>
 
   <div class="status-bar">
     <div class="status-left">
       <div class="status-indicator">
-        <div class="dot" id="status-dot"></div>
-        <span id="status-text">loading...</span>
+        <div class="dot"></div>
+        <span>strudel.cc repl — ctrl+enter to eval</span>
       </div>
-    </div>
-    <div class="status-right">
-      <span style="color:var(--muted)">ctrl+enter eval | ctrl+/ help</span>
     </div>
   </div>
 
-  <div class="help-overlay" id="help">
-    <div class="help-content">
-      <h2>strudel cheatsheet</h2>
-      <p><kbd>ctrl+enter</kbd> evaluate code</p>
-      <p><kbd>ctrl+/</kbd> toggle help</p>
-      <p><kbd>ctrl+.</kbd> silence all</p>
-      <div class="help-section">
-        <p><strong>sounds:</strong></p>
-        <p>s("bd sd hh cp") — drum samples</p>
-        <p>note("c4 e4 g4") — melodic notes</p>
-        <p>sound("gm_electric_piano") — general midi</p>
-      </div>
-      <div class="help-section">
-        <p><strong>patterns:</strong></p>
-        <p>fast(2) / slow(2) — speed up/slow down</p>
-        <p>rev — reverse</p>
-        <p>every(4, rev) — apply every N cycles</p>
-        <p>stack() — layer patterns together</p>
-        <p>cat() — sequence patterns</p>
-      </div>
-      <div class="help-section">
-        <p><strong>effects:</strong></p>
-        <p>.lpf(800) — lowpass filter</p>
-        <p>.hpf(200) — highpass filter</p>
-        <p>.delay(0.5) — delay</p>
-        <p>.room(0.5) — reverb</p>
-        <p>.gain(0.8) — volume</p>
-        <p>.pan("-1 1") — stereo pan</p>
-      </div>
-      <div class="help-section">
-        <p><a href="https://strudel.cc/learn/" target="_blank">full docs → strudel.cc/learn</a></p>
-      </div>
-      <button class="close" onclick="toggleHelp()">close</button>
-    </div>
-  </div>
-
-  <script src="https://unpkg.com/@strudel/repl@1.0.2"></script>
   <script>
-    let isPlaying = false;
-
+    // Presets as base64-encoded code for URL embedding
     const presets = {
       deephouse: `// deep house groove
 stack(
@@ -451,121 +216,23 @@ stack(
 )`
     };
 
-    function getEditor() {
-      return document.querySelector('strudel-editor');
+    function encodeForUrl(code) {
+      return btoa(unescape(encodeURIComponent(code)));
     }
 
     function loadPreset(name) {
-      const editor = getEditor();
-      if (editor && editor.setCode) {
-        editor.setCode(presets[name]);
-      }
+      // Update button states
+      document.querySelectorAll('.presets button').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-' + name).classList.add('active');
+
+      // Load in iframe via strudel.cc URL with encoded code
+      const encoded = encodeForUrl(presets[name]);
+      const iframe = document.getElementById('repl');
+      iframe.src = 'https://strudel.cc/#' + encoded;
     }
 
-    function doEval() {
-      const editor = getEditor();
-      if (editor) {
-        if (editor.evaluate) {
-          editor.evaluate();
-        } else {
-          // fallback: try dispatching ctrl+enter
-          editor.dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'Enter', ctrlKey: true, bubbles: true
-          }));
-        }
-        isPlaying = true;
-        document.getElementById('status-dot').classList.add('running');
-        document.getElementById('status-text').textContent = 'playing';
-      }
-    }
-
-    function doStop() {
-      const editor = getEditor();
-      if (editor) {
-        if (editor.stop) {
-          editor.stop();
-        } else if (editor.hush) {
-          editor.hush();
-        }
-      }
-      isPlaying = false;
-      document.getElementById('status-dot').classList.remove('running');
-      document.getElementById('status-text').textContent = 'stopped';
-    }
-
-    function setBPM(val) {
-      document.getElementById('bpm-val').textContent = val;
-      // strudel-editor should handle setcps internally
-    }
-
-    function toggleHelp() {
-      document.getElementById('help').classList.toggle('visible');
-    }
-
-    // Scope visualization
-    const canvas = document.getElementById('scope');
-    const ctx = canvas.getContext('2d');
-    let phase = 0;
-
-    function resize() {
-      canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
-      canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
-    }
-    resize();
-    window.addEventListener('resize', resize);
-
-    function drawScope() {
-      const w = canvas.offsetWidth;
-      const h = canvas.offsetHeight;
-      ctx.clearRect(0, 0, w, h);
-
-      const active = isPlaying ? 1 : 0.08;
-
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(203, 166, 247, 0.5)';
-      ctx.lineWidth = 1.5;
-      for (let x = 0; x < w; x++) {
-        const t = x / w;
-        const y = h/2 + Math.sin(t * Math.PI * 6 + phase) * (h * 0.35) * Math.sin(t * Math.PI) * active;
-        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(137, 180, 250, 0.25)';
-      for (let x = 0; x < w; x++) {
-        const t = x / w;
-        const y = h/2 + Math.sin(t * Math.PI * 10 + phase * 1.3) * (h * 0.2) * Math.sin(t * Math.PI) * active;
-        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      ctx.strokeStyle = 'rgba(30, 30, 46, 0.4)';
-      ctx.lineWidth = 0.5;
-      for (let i = 1; i < 4; i++) {
-        ctx.beginPath();
-        ctx.moveTo(0, (h / 4) * i);
-        ctx.lineTo(w, (h / 4) * i);
-        ctx.stroke();
-      }
-
-      phase += isPlaying ? 0.06 : 0.008;
-      requestAnimationFrame(drawScope);
-    }
-    drawScope();
-
-    // Initialize
-    customElements.whenDefined('strudel-editor').then(() => {
-      document.getElementById('status-text').textContent = 'ready';
-      // Load default preset
-      setTimeout(() => loadPreset('deephouse'), 500);
-    });
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.key === '/') { e.preventDefault(); toggleHelp(); }
-      // ctrl+enter is handled by strudel-editor internally
-    });
+    // Load default
+    loadPreset('deephouse');
   </script>
 </body>
 </html>
