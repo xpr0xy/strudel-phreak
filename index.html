@@ -93,15 +93,15 @@
     .main {
       flex: 1;
       min-height: 0;
-      display: flex;
-      flex-direction: column;
+      position: relative;
     }
 
     iframe#repl {
-      flex: 1;
+      position: absolute;
+      inset: 0;
       border: none;
       width: 100%;
-      min-height: 0;
+      height: 100%;
     }
 
     .status-bar {
@@ -145,7 +145,6 @@
       .logo h1 { font-size: 12px; }
       .presets { width: 100%; justify-content: stretch; }
       .presets button { flex: 1; padding: 8px 4px; font-size: 10px; }
-      .status-right { display: none; }
     }
   </style>
 </head>
@@ -177,7 +176,6 @@
   </div>
 
   <script>
-    // Pre-encoded preset URLs
     const presets = {
       deephouse: 'https://strudel.cc/#Ly8gZGVlcCBob3VzZSBncm9vdmUKc3RhY2soCiAgcygiYmQgfiB+IH4iKS5nYWluKDEuMiksCiAgcygifiB+IGhoIH4iKS5mYXN0KDIpLmdhaW4oMC41NSkucGFuKCI8LTAuMyAwLjM+IiksCiAgcygifiB+IH4gb2giKS5nYWluKDAuNDUpLnJvb20oMC4zKSwKICBub3RlKCJjMiB+IGViMiB+Iikuc291bmQoInNhd3Rvb3RoIikubHBmKHNpbmUucmFuZ2UoMjAwLCAxMjAwKS5zbG93KDgpKS5nYWluKDAuOCksCiAgbm90ZSgiPFtjMyxlYjMsZzMsYjNdIH4gW2YzLGFiMyxjNCxlYjRdIH4+Iikuc291bmQoInNpbmUiKS5scGYoODAwKS5yb29tKDAuNCkuZ2FpbigwLjQ1KS5zbG93KDIpLAogIHMoIn4gfiB+IHNkIikuZXZlcnkoNCwgcmV2KS5nYWluKDAuNTUpCik=',
       breakcore: 'https://strudel.cc/#Ly8gYnJlYWtjb3JlIGNoYW9zCnN0YWNrKAogIHMoImJkIHNkIFtoaCBoaF0gc2QiKS5mYXN0KDQpLmdhaW4oMC45KS5scGYoc2luZS5yYW5nZSg0MDAsIDQwMDApLmZhc3QoMikpLAogIG5vdGUoImMxIGMxIGcxIGFiMSIpLmZhc3QoMikuc291bmQoInNhd3Rvb3RoIikubHBmKDIwMCkuZ2FpbigxKSwKICBub3RlKCJjNSBlNSBnNSBiYjUgYzYiKS5mYXN0KDIpLmV2ZXJ5KDMsIHJldikuc291bmQoInNxdWFyZSIpLmxwZigyMDAwKS5nYWluKDAuMzUpLAogIHMoImJkKDMsOCkiKS5nYWluKDAuOCkuc3BlZWQoIjwxIDIgMC41IC0xPiIpLmV2ZXJ5KDIsIGZhc3QoMikpCik=',
@@ -190,8 +188,17 @@
       document.querySelectorAll('.presets button').forEach(b => b.classList.remove('active'));
       document.getElementById('btn-' + name).classList.add('active');
 
-      // Load iframe
-      document.getElementById('repl').src = presets[name];
+      // Replace iframe entirely to force reload
+      const container = document.querySelector('.main');
+      const oldIframe = document.getElementById('repl');
+      if (oldIframe) oldIframe.remove();
+
+      const newIframe = document.createElement('iframe');
+      newIframe.id = 'repl';
+      newIframe.allow = 'autoplay';
+      newIframe.sandbox = 'allow-scripts allow-same-origin allow-popups';
+      newIframe.src = presets[name];
+      container.appendChild(newIframe);
     }
 
     // Load default
