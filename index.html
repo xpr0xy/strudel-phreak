@@ -177,58 +177,21 @@
   </div>
 
   <script>
-    // Presets as base64-encoded code for URL embedding
+    // Pre-encoded preset URLs
     const presets = {
-      deephouse: `// deep house groove
-stack(
-  s("bd ~ ~ ~").gain(1.2),
-  s("~ ~ hh ~").fast(2).gain(0.55).pan("<-0.3 0.3>"),
-  s("~ ~ ~ oh").gain(0.45).room(0.3),
-  note("c2 ~ eb2 ~").sound("sawtooth").lpf(sine.range(200, 1200).slow(8)).gain(0.8),
-  note("<[c3,eb3,g3,b3] ~ [f3,ab3,c4,eb4] ~>").sound("sine").lpf(800).room(0.4).gain(0.45).slow(2),
-  s("~ ~ ~ sd").every(4, rev).gain(0.55)
-)`,
-
-      breakcore: `// breakcore chaos
-stack(
-  s("bd sd [hh hh] sd").fast(4).gain(0.9).lpf(sine.range(400, 4000).fast(2)),
-  note("c1 c1 g1 ab1").fast(2).sound("sawtooth").lpf(200).gain(1),
-  note("c5 e5 g5 bb5 c6").fast(2).every(3, rev).sound("square").lpf(2000).gain(0.35),
-  s("bd(3,8)").gain(0.8).speed("<1 2 0.5 -1>").every(2, fast(2))
-)`,
-
-      acid: `// 303 acid
-stack(
-  s("bd ~ ~ ~").gain(1.1),
-  s("~ hh ~ hh").gain(0.5).pan("<-0.5 0.5>"),
-  note("<c2 [c2 eb2] g2 [bb2 c3]>").sound("sawtooth").lpf(sine.range(200, 3000).fast(2)).resonance(12).gain(0.9),
-  note("c1 ~ ~ c1").sound("sine").gain(0.7),
-  note("<~ [c4,eb4,g4] ~ ~>").sound("square").lpf(1200).gain(0.3).room(0.5)
-)`,
-
-      ambient: `// deep ambient
-stack(
-  note("<[c3,e3,g3,b3] [f3,a3,c4,e4]>").sound("sine").slow(4).room(0.8).gain(0.25),
-  note("c5").sound("sine").lpf(sine.range(200, 2000).slow(16)).gain(sine.range(0.04, 0.15)).pan(sine.range(-1, 1).slow(8)),
-  note("c1").sound("sine").slow(8).gain(0.35),
-  s("white").gain(sine.range(0, 0.06).fast(32)).hpf(4000).pan("<-1 -0.5 0 0.5 1>").slow(2),
-  note("<c5 ~ ~ e5 ~ g5 ~ ~>").sound("triangle").slow(2).gain(0.15).room(0.9).lpf(1500)
-)`
+      deephouse: 'https://strudel.cc/#Ly8gZGVlcCBob3VzZSBncm9vdmUKc3RhY2soCiAgcygiYmQgfiB+IH4iKS5nYWluKDEuMiksCiAgcygifiB+IGhoIH4iKS5mYXN0KDIpLmdhaW4oMC41NSkucGFuKCI8LTAuMyAwLjM+IiksCiAgcygifiB+IH4gb2giKS5nYWluKDAuNDUpLnJvb20oMC4zKSwKICBub3RlKCJjMiB+IGViMiB+Iikuc291bmQoInNhd3Rvb3RoIikubHBmKHNpbmUucmFuZ2UoMjAwLCAxMjAwKS5zbG93KDgpKS5nYWluKDAuOCksCiAgbm90ZSgiPFtjMyxlYjMsZzMsYjNdIH4gW2YzLGFiMyxjNCxlYjRdIH4+Iikuc291bmQoInNpbmUiKS5scGYoODAwKS5yb29tKDAuNCkuZ2FpbigwLjQ1KS5zbG93KDIpLAogIHMoIn4gfiB+IHNkIikuZXZlcnkoNCwgcmV2KS5nYWluKDAuNTUpCik=',
+      breakcore: 'https://strudel.cc/#Ly8gYnJlYWtjb3JlIGNoYW9zCnN0YWNrKAogIHMoImJkIHNkIFtoaCBoaF0gc2QiKS5mYXN0KDQpLmdhaW4oMC45KS5scGYoc2luZS5yYW5nZSg0MDAsIDQwMDApLmZhc3QoMikpLAogIG5vdGUoImMxIGMxIGcxIGFiMSIpLmZhc3QoMikuc291bmQoInNhd3Rvb3RoIikubHBmKDIwMCkuZ2FpbigxKSwKICBub3RlKCJjNSBlNSBnNSBiYjUgYzYiKS5mYXN0KDIpLmV2ZXJ5KDMsIHJldikuc291bmQoInNxdWFyZSIpLmxwZigyMDAwKS5nYWluKDAuMzUpLAogIHMoImJkKDMsOCkiKS5nYWluKDAuOCkuc3BlZWQoIjwxIDIgMC41IC0xPiIpLmV2ZXJ5KDIsIGZhc3QoMikpCik=',
+      acid: 'https://strudel.cc/#Ly8gMzAzIGFjaWQKc3RhY2soCiAgcygiYmQgfiB+IH4iKS5nYWluKDEuMSksCiAgcygifiBoaCB+IGhoIikuZ2FpbigwLjUpLnBhbigiPC0wLjUgMC41PiIpLAogIG5vdGUoIjxjMiBbYzIgZWIyXSBnMiBbYmIyIGMzXT4iKS5zb3VuZCgic2F3dG9vdGgiKS5scGYoc2luZS5yYW5nZSgyMDAsIDMwMDApLmZhc3QoMikpLnJlc29uYW5jZSgxMikuZ2FpbigwLjkpLAogIG5vdGUoImMxIH4gfiBjMSIpLnNvdW5kKCJzaW5lIikuZ2FpbigwLjcpLAogIG5vdGUoIjx+IFtjNCxlYjQsZzRdIH4gfj4iKS5zb3VuZCgic3F1YXJlIikubHBmKDEyMDApLmdhaW4oMC4zKS5yb29tKDAuNSkKKQ==',
+      ambient: 'https://strudel.cc/#Ly8gZGVlcCBhbWJpZW50CnN0YWNrKAogIG5vdGUoIjxbYzMsZTMsZzMsYjNdIFtmMyxhMyxjNCxlNF0+Iikuc291bmQoInNpbmUiKS5zbG93KDQpLnJvb20oMC44KS5nYWluKDAuMjUpLAogIG5vdGUoImM1Iikuc291bmQoInNpbmUiKS5scGYoc2luZS5yYW5nZSgyMDAsIDIwMDApLnNsb3coMTYpKS5nYWluKHNpbmUucmFuZ2UoMC4wNCwgMC4xNSkpLnBhbihzaW5lLnJhbmdlKC0xLCAxKS5zbG93KDgpKSwKICBub3RlKCJjMSIpLnNvdW5kKCJzaW5lIikuc2xvdyg4KS5nYWluKDAuMzUpLAogIHMoIndoaXRlIikuZ2FpbihzaW5lLnJhbmdlKDAsIDAuMDYpLmZhc3QoMzIpKS5ocGYoNDAwMCkucGFuKCI8LTEgLTAuNSAwIDAuNSAxPiIpLnNsb3coMiksCiAgbm90ZSgiPGM1IH4gfiBlNSB+IGc1IH4gfj4iKS5zb3VuZCgidHJpYW5nbGUiKS5zbG93KDIpLmdhaW4oMC4xNSkucm9vbSgwLjkpLmxwZigxNTAwKQop'
     };
-
-    function encodeForUrl(code) {
-      return btoa(unescape(encodeURIComponent(code)));
-    }
 
     function loadPreset(name) {
       // Update button states
       document.querySelectorAll('.presets button').forEach(b => b.classList.remove('active'));
       document.getElementById('btn-' + name).classList.add('active');
 
-      // Load in iframe via strudel.cc URL with encoded code
-      const encoded = encodeForUrl(presets[name]);
-      const iframe = document.getElementById('repl');
-      iframe.src = 'https://strudel.cc/#' + encoded;
+      // Load iframe
+      document.getElementById('repl').src = presets[name];
     }
 
     // Load default
