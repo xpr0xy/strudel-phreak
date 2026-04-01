@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>strudel phreak</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+    }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: #1e1e2e;
+      --text: #cdd6f4;
+      --muted: #6c7086;
+      --accent: #cba6f7;
+      --accent2: #89b4fa;
+      --green: #a6e3a1;
+      --red: #f38ba8;
+      --yellow: #f9e2af;
+      --orange: #fab387;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .logo .tag {
+      font-size: 10px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-group label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 80px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .val {
+      font-size: 12px;
+      color: var(--accent2);
+      min-width: 30px;
+      text-align: right;
+    }
+
+    button {
+      background: var(--border);
+      color: var(--text);
+      border: 1px solid var(--accent);
+      padding: 6px 16px;
+      font-family: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    button:hover {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    button.active {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    button.stop {
+      border-color: var(--red);
+    }
+
+    button.stop:hover, button.stop.active {
+      background: var(--red);
+    }
+
+    .presets {
+      display: flex;
+      gap: 6px;
+    }
+
+    .presets button {
+      font-size: 10px;
+      padding: 4px 10px;
+      border-color: var(--muted);
+    }
+
+    .presets button:hover {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .editor-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    textarea#editor {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      border: none;
+      padding: 20px;
+      font-family: inherit;
+      font-size: 15px;
+      line-height: 1.7;
+      resize: none;
+      outline: none;
+      tab-size: 2;
+    }
+
+    textarea#editor::selection {
+      background: rgba(203, 166, 247, 0.3);
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 20px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    .status-left, .status-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+
+    .dot.running {
+      background: var(--green);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .visualizer {
+      height: 60px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    canvas#scope {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .help-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 15, 0.9);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .help-overlay.visible {
+      display: flex;
+    }
+
+    .help-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px 32px;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .help-content h2 {
+      color: var(--accent);
+      font-size: 14px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .help-content kbd {
+      background: var(--border);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+      color: var(--accent2);
+    }
+
+    .help-content p {
+      font-size: 12px;
+      line-height: 1.8;
+      margin-bottom: 8px;
+    }
+
+    .help-content .close {
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <h1>strudel phreak</h1>
+      <span class="tag">v0.1</span>
+    </div>
+    <div class="controls">
+      <div class="presets">
+        <button onclick="loadPreset('deephouse')">deep house</button>
+        <button onclick="loadPreset('breakcore')">breakcore</button>
+        <button onclick="loadPreset('acid')">acid</button>
+        <button onclick="loadPreset('ambient')">ambient</button>
+      </div>
+      <div class="control-group">
+        <label>bpm</label>
+        <input type="range" id="bpm" min="60" max="200" value="128" oninput="updateBPM(this.value)">
+        <span class="val" id="bpm-val">128</span>
+      </div>
+      <button id="eval-btn" onclick="evaluateCode()">eval (ctrl+enter)</button>
+      <button id="stop-btn" class="stop" onclick="stopAll()">stop</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="editor-container">
+      <textarea id="editor" spellcheck="false" placeholder="// write strudel patterns here
+// ctrl+enter to evaluate
+// ctrl+/ for help"></textarea>
+    </div>
+    <div class="visualizer">
+      <canvas id="scope"></canvas>
+    </div>
+    <div class="status-bar">
+      <div class="status-left">
+        <div class="status-indicator">
+          <div class="dot" id="status-dot"></div>
+          <span id="status-text">ready</span>
+        </div>
+        <span id="pattern-info" style="color: var(--muted)"></span>
+      </div>
+      <div class="status-right">
+        <span style="color: var(--muted)">ctrl+enter eval | ctrl+/ help</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="help-overlay" id="help">
+    <div class="help-content">
+      <h2>strudel cheatsheet</h2>
+      <p><kbd>ctrl+enter</kbd> evaluate code</p>
+      <p><kbd>ctrl+/</kbd> toggle help</p>
+      <p><kbd>ctrl+.</kbd> silence all</p>
+      <p></p>
+      <p><strong>patterns:</strong></p>
+      <p><span style="color:var(--accent)">note</span>("c4 e4 g4 b4") — notes</p>
+      <p><span style="color:var(--accent)">s</span>("bd sd hh cp") — samples</p>
+      <p><span style="color:var(--accent)">sound</span>("gm_electric_guitar_clean") — general midi</p>
+      <p><span style="color:var(--accent)">freq</span>(440) — frequency</p>
+      <p></p>
+      <p><strong>patterns:</strong></p>
+      <p><span style="color:var(--accent2)">fast</span>(2) / <span style="color:var(--accent2)">slow</span>(2) — speed</p>
+      <p><span style="color:var(--accent2)">rev</span> — reverse</p>
+      <p><span style="color:var(--accent2)">every</span>(4, rev) — conditional</p>
+      <p><span style="color:var(--accent2)">chunk</span>(4, fast(2)) — subdivision</p>
+      <p><span style="color:var(--accent2)">stack</span>() — layer patterns</p>
+      <p><span style="color:var(--accent2)">cat</span>() — sequence</p>
+      <p></p>
+      <p><strong>effects:</strong></p>
+      <p>.<span style="color:var(--green)">lpf</span>(800) — lowpass filter</p>
+      <p>.<span style="color:var(--green)">hpf</span>(200) — highpass filter</p>
+      <p>.<span style="color:var(--green)">delay</span>(0.5) — delay</p>
+      <p>.<span style="color:var(--green)">room</span>(0.5) — reverb</p>
+      <p>.<span style="color:var(--green)">gain</span>(0.8) — volume</p>
+      <p>.<span style="color:var(--green)">pan</span>("<-1 1>") — panning</p>
+      <p></p>
+      <p><a href="https://strudel.cc/learn/" target="_blank" style="color:var(--accent)">full docs → strudel.cc/learn</a></p>
+      <button class="close" onclick="toggleHelp()">close</button>
+    </div>
+  </div>
+
+  <script type="module">
+    // Import Strudel from CDN
+    import { initStrudel, evaluate, silence, setcps } from 'https://unpkg.com/@strudel/core@latest';
+    import 'https://unpkg.com/@strudel/mini@latest';
+    import 'https://unpkg.com/@strudel/webaudio@latest';
+    import 'https://unpkg.com/@strudel/tonal@latest';
+    import 'https://unpkg.com/@strudel/mini@latest';
+
+    // Expose to global scope
+    window.strudelEval = evaluate;
+    window.strudelSilence = silence;
+    window.strudelSetCps = setcps;
+
+    // Initialize Strudel
+    await initStrudel();
+
+    // Set up visualizer
+    const canvas = document.getElementById('scope');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Simple animated scope visualization
+    let phase = 0;
+    function drawScope() {
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      // Draw waveform
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(203, 166, 247, 0.6)';
+      ctx.lineWidth = 1.5;
+
+      for (let x = 0; x < w; x++) {
+        const t = x / w;
+        const y = h/2 + Math.sin(t * Math.PI * 8 + phase) * (h * 0.3)
+                       * Math.sin(t * Math.PI) * (window._isPlaying ? 1 : 0.1);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Second layer
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(137, 180, 250, 0.3)';
+      for (let x = 0; x < w; x++) {
+        const t = x / w;
+        const y = h/2 + Math.sin(t * Math.PI * 12 + phase * 1.3) * (h * 0.2)
+                       * Math.sin(t * Math.PI) * (window._isPlaying ? 1 : 0.05);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Grid lines
+      ctx.strokeStyle = 'rgba(30, 30, 46, 0.5)';
+      ctx.lineWidth = 0.5;
+      for (let i = 1; i < 8; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, (h / 8) * i);
+        ctx.lineTo(w, (h / 8) * i);
+        ctx.stroke();
+      }
+
+      phase += window._isPlaying ? 0.08 : 0.01;
+      requestAnimationFrame(drawScope);
+    }
+    drawScope();
+
+    window._isPlaying = false;
+
+    window.evaluateCode = async function() {
+      const code = document.getElementById('editor').value;
+      if (!code.trim()) return;
+
+      const statusDot = document.getElementById('status-dot');
+      const statusText = document.getElementById('status-text');
+
+      try {
+        statusText.textContent = 'evaluating...';
+        await window.strudelEval(code);
+        statusDot.classList.add('running');
+        statusText.textContent = 'playing';
+        window._isPlaying = true;
+      } catch (e) {
+        statusText.textContent = 'error: ' + e.message.substring(0, 50);
+        statusDot.classList.remove('running');
+      }
+    };
+
+    window.stopAll = function() {
+      window.strudelSilence();
+      document.getElementById('status-dot').classList.remove('running');
+      document.getElementById('status-text').textContent = 'stopped';
+      window._isPlaying = false;
+    };
+
+    window.updateBPM = function(val) {
+      document.getElementById('bpm-val').textContent = val;
+      window.strudelSetCps(val / 60 / 4);
+    };
+
+    window.toggleHelp = function() {
+      document.getElementById('help').classList.toggle('visible');
+    };
+
+    // Presets
+    const presets = {
+      deephouse: `// deep house groove
+stack(
+  // kick
+  s("bd ~ ~ ~").gain(1.2),
+  // hats
+  s("~ ~ hh ~").fast(2).gain(0.6).pan("<-0.3 0.3>"),
+  // open hat
+  s("~ ~ ~ oh").gain(0.5).room(0.3),
+  // bass
+  note("c2 ~ eb2 ~").sound("sawtooth").lpf(sine.range(200, 1200).slow(8)).gain(0.8),
+  // chords
+  note("<[c3,eb3,g3,b3] ~ [f3,ab3,c4,eb4] ~>").sound("sine").lpf(800).room(0.4).gain(0.5).slow(2),
+  // vocal stab
+  s("~ ~ ~ sd").every(4, rev).gain(0.6)
+)`,
+
+      breakcore: `// breakcore chaos
+stack(
+  // amen but make it hurt
+  s("bd sd [hh hh] sd").fast(4).gain(0.9).lpf(sine.range(400, 4000).fast(2)),
+  // distorted bass
+  note("c1 c1 g1 ab1").fast(2).sound("sawtooth").lpf(200).gain(1).distort(0.3),
+  // melody chaos
+  note("c5 e5 g5 bb5 c6").fast(2).every(3, rev).sound("square").lpf(2000).gain(0.4),
+  // amen break chops
+  s("bd(3,8)").gain(0.8).speed("<1 2 0.5 -1>").every(2, fast(2)),
+  // noise bursts
+  s("white").gain(sine.range(0, 0.3).fast(16)).lpf(sine.range(500, 5000).fast(4))
+)`,
+
+      acid: `// 303 acid
+stack(
+  // kick
+  s("bd ~ ~ ~").gain(1.1),
+  // hihat
+  s("~ hh ~ hh").gain(0.5).pan("<-0.5 0.5>"),
+  // THE acid line
+  note("<c2 [c2 eb2] g2 [bb2 c3]>").sound("sawtooth").lpf(sine.range(200, 3000).fast(2)).resonance(12).gain(0.9),
+  // sub
+  note("c1 ~ ~ c1").sound("sine").gain(0.7),
+  // stabs
+  note("<~ [c4,eb4,g4] ~ ~>").sound("square").lpf(1200).gain(0.35).room(0.5)
+)`,
+
+      ambient: `// deep ambient
+stack(
+  // slow pad
+  note("<[c3,e3,g3,b3] [f3,a3,c4,e4]>").sound("sine").slow(4).room(0.8).gain(0.3),
+  // texture
+  note("c5").sound("sine").lpf(sine.range(200, 2000).slow(16)).gain(sine.range(0.05, 0.2)).pan(sine.range(-1, 1).slow(8)),
+  // deep tone
+  note("c1").sound("sine").slow(8).gain(0.4),
+  // sparkles
+  s("white").gain(sine.range(0, 0.08).fast(32)).hpf(4000).pan("<-1 -0.5 0 0.5 1>").slow(2),
+  // melody fragments
+  note("<c5 ~ ~ e5 ~ g5 ~ ~>").sound("triangle").slow(2).gain(0.2).room(0.9).lpf(1500)
+)`
+    };
+
+    window.loadPreset = function(name) {
+      document.getElementById('editor').value = presets[name];
+      document.getElementById('pattern-info').textContent = name;
+    };
+
+    // Load default
+    window.loadPreset('deephouse');
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        window.evaluateCode();
+      }
+      if (e.ctrlKey && e.key === '/') {
+        e.preventDefault();
+        window.toggleHelp();
+      }
+      if (e.ctrlKey && e.key === '.') {
+        e.preventDefault();
+        window.stopAll();
+      }
+    });
+
+    // Set initial BPM
+    window.updateBPM(128);
+  </script>
+</body>
+</html>
