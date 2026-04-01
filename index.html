@@ -19,8 +19,6 @@
       --accent2: #89b4fa;
       --green: #a6e3a1;
       --red: #f38ba8;
-      --yellow: #f9e2af;
-      --orange: #fab387;
     }
 
     body {
@@ -97,12 +95,6 @@
       border-color: var(--accent);
       background: var(--accent);
       color: var(--bg);
-    }
-
-    button.active {
-      background: var(--accent);
-      color: var(--bg);
-      border-color: var(--accent);
     }
 
     button.stop {
@@ -232,64 +224,18 @@
       50% { opacity: 0.4; }
     }
 
-    /* mobile */
     @media (max-width: 640px) {
-      header {
-        padding: 8px 12px;
-      }
-
-      .logo h1 {
-        font-size: 12px;
-      }
-
-      .controls {
-        width: 100%;
-        justify-content: space-between;
-      }
-
-      .presets {
-        order: 2;
-        width: 100%;
-        justify-content: stretch;
-      }
-
-      .presets button {
-        flex: 1;
-        padding: 8px 4px;
-        font-size: 10px;
-      }
-
-      .control-group {
-        order: 1;
-      }
-
-      button.eval-btn, button.stop {
-        order: 1;
-        padding: 8px 14px;
-      }
-
-      textarea#editor {
-        font-size: 13px;
-        padding: 12px;
-      }
-
-      .status-right {
-        display: none;
-      }
-
-      .visualizer {
-        height: 40px;
-      }
+      header { padding: 8px 12px; }
+      .logo h1 { font-size: 12px; }
+      .controls { width: 100%; justify-content: space-between; }
+      .presets { order: 2; width: 100%; justify-content: stretch; }
+      .presets button { flex: 1; padding: 8px 4px; font-size: 10px; }
+      .control-group { order: 1; }
+      textarea#editor { font-size: 13px; padding: 12px; }
+      .status-right { display: none; }
+      .visualizer { height: 40px; }
     }
 
-    @media (max-width: 400px) {
-      .presets button {
-        font-size: 9px;
-        padding: 8px 2px;
-      }
-    }
-
-    /* help overlay */
     .help-overlay {
       display: none;
       position: fixed;
@@ -330,11 +276,7 @@
       color: var(--accent2);
     }
 
-    .help-content p {
-      font-size: 11px;
-      line-height: 1.9;
-    }
-
+    .help-content p { font-size: 11px; line-height: 1.9; }
     .help-content a { color: var(--accent); }
 
     .help-section {
@@ -394,14 +336,12 @@
       <p><kbd>ctrl+enter</kbd> evaluate code</p>
       <p><kbd>ctrl+/</kbd> toggle help</p>
       <p><kbd>ctrl+.</kbd> silence all</p>
-
       <div class="help-section">
         <p><strong>sounds:</strong></p>
         <p>s("bd sd hh cp") — drum samples</p>
         <p>note("c4 e4 g4") — melodic notes</p>
         <p>sound("gm_electric_piano") — general midi</p>
       </div>
-
       <div class="help-section">
         <p><strong>patterns:</strong></p>
         <p>fast(2) / slow(2) — speed up/slow down</p>
@@ -410,7 +350,6 @@
         <p>stack() — layer patterns together</p>
         <p>cat() — sequence patterns</p>
       </div>
-
       <div class="help-section">
         <p><strong>effects:</strong></p>
         <p>.lpf(800) — lowpass filter</p>
@@ -420,7 +359,6 @@
         <p>.gain(0.8) — volume</p>
         <p>.pan("-1 1") — stereo pan</p>
       </div>
-
       <div class="help-section">
         <p><a href="https://strudel.cc/learn/" target="_blank">full docs → strudel.cc/learn</a></p>
       </div>
@@ -428,13 +366,10 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/@strudel/web@1.0.3"></script>
+  <!-- Use strudel/repl web component - handles all deps internally -->
+  <script src="https://unpkg.com/@strudel/repl@1.0.2"></script>
   <script>
     let isPlaying = false;
-    let activePattern = null;
-
-    // Initialize strudel
-    initStrudel();
 
     // Presets
     const presets = {
@@ -475,26 +410,53 @@ stack(
 )`
     };
 
+    // Wait for strudel-editor component to register
+    customElements.whenDefined('strudel-editor').then(() => {
+      document.getElementById('status-text').textContent = 'ready';
+      loadPreset('deephouse');
+    });
+
+    function getEditor() {
+      return document.querySelector('strudel-editor');
+    }
+
     function loadPreset(name) {
-      document.getElementById('editor').value = presets[name];
+      const editor = getEditor();
+      if (editor) {
+        editor.setCode(presets[name]);
+      } else {
+        document.getElementById('editor').value = presets[name];
+      }
     }
 
     function doEval() {
-      const code = document.getElementById('editor').value;
-      if (!code.trim()) return;
-      try {
-        evaluate(code);
-        isPlaying = true;
-        document.getElementById('status-dot').classList.add('running');
-        document.getElementById('status-text').textContent = 'playing';
-      } catch(e) {
-        document.getElementById('status-text').textContent = 'error';
-        console.error(e);
+      const editor = getEditor();
+      if (editor) {
+        editor.evaluate();
+      } else {
+        // fallback: use textarea
+        const code = document.getElementById('editor').value;
+        if (code.trim()) {
+          try {
+            evaluate(code);
+            isPlaying = true;
+            document.getElementById('status-dot').classList.add('running');
+            document.getElementById('status-text').textContent = 'playing';
+          } catch(e) {
+            document.getElementById('status-text').textContent = 'error';
+            console.error(e);
+          }
+        }
       }
     }
 
     function doStop() {
-      hush();
+      const editor = getEditor();
+      if (editor) {
+        editor.stop();
+      } else {
+        hush();
+      }
       isPlaying = false;
       document.getElementById('status-dot').classList.remove('running');
       document.getElementById('status-text').textContent = 'stopped';
@@ -502,7 +464,11 @@ stack(
 
     function setBPM(val) {
       document.getElementById('bpm-val').textContent = val;
-      setcps(val / 60 / 4);
+      const editor = getEditor();
+      if (editor) {
+        // The editor should pick up setcps changes
+        try { setcps(val / 60 / 4); } catch(e) {}
+      }
     }
 
     function toggleHelp() {
@@ -528,7 +494,6 @@ stack(
 
       const active = isPlaying ? 1 : 0.08;
 
-      // main wave
       ctx.beginPath();
       ctx.strokeStyle = 'rgba(203, 166, 247, 0.5)';
       ctx.lineWidth = 1.5;
@@ -539,7 +504,6 @@ stack(
       }
       ctx.stroke();
 
-      // second layer
       ctx.beginPath();
       ctx.strokeStyle = 'rgba(137, 180, 250, 0.25)';
       for (let x = 0; x < w; x++) {
@@ -549,7 +513,6 @@ stack(
       }
       ctx.stroke();
 
-      // grid
       ctx.strokeStyle = 'rgba(30, 30, 46, 0.4)';
       ctx.lineWidth = 0.5;
       for (let i = 1; i < 4; i++) {
@@ -570,10 +533,6 @@ stack(
       if (e.ctrlKey && e.key === '/') { e.preventDefault(); toggleHelp(); }
       if (e.ctrlKey && e.key === '.') { e.preventDefault(); doStop(); }
     });
-
-    // Initial state
-    document.getElementById('status-text').textContent = 'ready';
-    loadPreset('deephouse');
   </script>
 </body>
 </html>
